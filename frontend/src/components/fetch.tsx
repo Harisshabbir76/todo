@@ -1,16 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
-export default function Fetch() {
+const Fetch = forwardRef((props, ref) => {
   const [todos, setTodos] = useState([]);
   const [error, setError] = useState('');
   const [expandedTodo, setExpandedTodo] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', description: '' });
-
-  useEffect(() => {
-    fetchTodos();
-  }, []);
 
   const fetchTodos = async () => {
     try {
@@ -23,6 +19,14 @@ export default function Fetch() {
       setError(err.message);
     }
   };
+
+  useImperativeHandle(ref, () => ({
+    fetchTodos
+  }));
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   const toggleTodo = (id) => {
     setExpandedTodo(expandedTodo === id ? null : id);
@@ -262,4 +266,8 @@ export default function Fetch() {
       </div>
     </div>
   );
-}
+});
+
+Fetch.displayName = 'Fetch';
+
+export default Fetch;

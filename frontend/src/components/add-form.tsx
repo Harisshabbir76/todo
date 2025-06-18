@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function AddForm({ onTaskAdded }) {
+export default function AddForm({ onTaskAdded = () => {} }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +34,7 @@ export default function AddForm({ onTaskAdded }) {
 
       setTitle('');
       setDescription('');
-      if (onTaskAdded) onTaskAdded();
+      onTaskAdded();
     } catch (error) {
       if (error.message.includes('Unauthorized')) {
         localStorage.removeItem('userId');
