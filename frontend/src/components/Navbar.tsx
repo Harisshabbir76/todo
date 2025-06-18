@@ -3,20 +3,25 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface User {
+  id: string;
+  name: string | null;
+}
+
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = () => {
       const userId = localStorage.getItem('userId');
-      setUser(userId ? { id: userId, name: localStorage.getItem('username') } : null);
+      setUser(userId ? { 
+        id: userId, 
+        name: localStorage.getItem('username') 
+      } : null);
     };
     
-    
     checkAuth();
-    
-    
     window.addEventListener('storage', checkAuth);
     
     return () => window.removeEventListener('storage', checkAuth);
