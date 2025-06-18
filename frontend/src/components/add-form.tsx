@@ -1,15 +1,19 @@
 'use client';
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function AddForm({ onTaskAdded = () => {} }) {
+interface AddFormProps {
+  onTaskAdded?: () => void;
+}
+
+export default function AddForm({ onTaskAdded = () => {} }: AddFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const userId = localStorage.getItem('userId');
@@ -36,7 +40,7 @@ export default function AddForm({ onTaskAdded = () => {} }) {
       setDescription('');
       onTaskAdded();
     } catch (error) {
-      if (error.message.includes('Unauthorized')) {
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
         localStorage.removeItem('userId');
         localStorage.removeItem('username');
         router.push('/login');
@@ -64,7 +68,7 @@ export default function AddForm({ onTaskAdded = () => {} }) {
             id="title"
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             placeholder="What needs to be done?"
             required
             className="w-full px-4 py-3 text-slate-800 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
@@ -78,7 +82,7 @@ export default function AddForm({ onTaskAdded = () => {} }) {
           <textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
             placeholder="Add some details..."
             rows={4}
             className="w-full px-4 py-3 text-slate-800 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
