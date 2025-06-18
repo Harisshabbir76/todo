@@ -9,11 +9,11 @@ export default function SignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage('');
@@ -23,6 +23,7 @@ export default function SignupForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
+        credentials: 'include' // Required for cookies
       });
 
       const data = await res.json();
@@ -33,7 +34,7 @@ export default function SignupForm() {
         setMessage(data.error || 'Registration failed');
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      setMessage(error instanceof Error ? error.message : 'An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
