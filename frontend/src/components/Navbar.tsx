@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await fetch('https://todo-backend-yktq.onrender.com/logout', { method: 'POST' });
+      await fetch('https://todo-backend-jade-delta.vercel.app/logout', { method: 'POST' });
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
       setUser(null);

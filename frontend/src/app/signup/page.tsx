@@ -19,7 +19,7 @@ export default function SignupForm() {
     setMessage('');
 
     try {
-      const res = await fetch('https://todo-backend-yktq.onrender.com/signup', {
+      const res = await fetch('https://todo-backend-jade-delta.vercel.app/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

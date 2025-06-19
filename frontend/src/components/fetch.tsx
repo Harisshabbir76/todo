@@ -20,19 +20,24 @@ const Fetch = forwardRef((props, ref) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>({ title: '', description: '' });
 
+  const BASE_URL = 'https://todo-backend-jade-delta.vercel.app';
+
   const fetchTodos = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const response = await fetch(`https://todo-backend-yktq.onrender.com/all/todos?userId=${userId || ''}`);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch todos');
-      setTodos(data);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
+      const response = await fetch(`${BASE_URL}/all/todos?userId=${userId || ''}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch todos');
       }
+
+      const data = await response.json();
+      setTodos(data);
+      setError('');
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch todos');
     }
   };
 
@@ -50,7 +55,10 @@ const Fetch = forwardRef((props, ref) => {
 
   const startEditing = (todo: Todo) => {
     setEditingId(todo.id);
-    setEditForm({ title: todo.title, description: todo.description || '' });
+    setEditForm({ 
+      title: todo.title, 
+      description: todo.description || '' 
+    });
   };
 
   const cancelEditing = () => {
@@ -59,74 +67,71 @@ const Fetch = forwardRef((props, ref) => {
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEditForm(prev => ({ ...prev, [name]: value }));
   };
 
   const saveEdit = async (id: string) => {
+    if (!editForm.title.trim()) {
+      setError('Title cannot be empty');
+      return;
+    }
+
     try {
-      const response = await fetch(`https://todo-backend-yktq.onrender.com/edit-todo/${id}`, {
+      const response = await fetch(`${BASE_URL}/edit-todo/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update todo');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update todo');
       }
 
       await fetchTodos();
       setEditingId(null);
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+      console.error('Update error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to update todo');
     }
   };
 
   const deleteTodo = async (id: string) => {
     try {
-      const response = await fetch(`https://todo-backend-yktq.onrender.com/delete-todo/${id}`, {
+      const response = await fetch(`${BASE_URL}/delete-todo/${id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete todo');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete todo');
       }
 
       await fetchTodos();
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+      console.error('Delete error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete todo');
     }
   };
 
   const toggleCompletion = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`https://todo-backend-yktq.onrender.com/toggle-todo/${id}`, {
+      const response = await fetch(`${BASE_URL}/toggle-todo/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isCompleted: !currentStatus }),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update task status');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update task status');
       }
 
       await fetchTodos();
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+      console.error('Toggle error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to update status');
     }
   };
 
@@ -142,6 +147,13 @@ const Fetch = forwardRef((props, ref) => {
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-center border border-red-100">
             {error}
+            <button 
+              onClick={() => setError('')} 
+              className="ml-2 text-red-800 hover:text-red-900"
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
           </div>
         )}
         
@@ -181,6 +193,7 @@ const Fetch = forwardRef((props, ref) => {
                       value={editForm.title}
                       onChange={handleEditChange}
                       className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500"
+                      autoFocus
                     />
                   ) : (
                     <span 
@@ -199,13 +212,13 @@ const Fetch = forwardRef((props, ref) => {
                     <>
                       <button
                         onClick={() => saveEdit(todo.id)}
-                        className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg"
+                        className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg transition-colors"
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEditing}
-                        className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg"
+                        className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg transition-colors"
                       >
                         Cancel
                       </button>
