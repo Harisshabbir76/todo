@@ -261,7 +261,7 @@ const Fetch = forwardRef((props, ref) => {
                     value={editForm.description}
                     onChange={handleEditChange}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
-                    rows="3"
+                    rows={3}
                     placeholder="Add description..."
                   />
                 </div>
