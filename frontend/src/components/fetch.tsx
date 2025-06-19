@@ -1,12 +1,24 @@
 'use client';
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
+interface Todo {
+  id: string;
+  title: string;
+  description?: string;
+  is_completed: boolean;
+}
+
+interface EditForm {
+  title: string;
+  description: string;
+}
+
 const Fetch = forwardRef((props, ref) => {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [error, setError] = useState('');
-  const [expandedTodo, setExpandedTodo] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '' });
+  const [expandedTodo, setExpandedTodo] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({ title: '', description: '' });
 
   const fetchTodos = async () => {
     try {
@@ -16,7 +28,11 @@ const Fetch = forwardRef((props, ref) => {
       if (!response.ok) throw new Error(data.error || 'Failed to fetch todos');
       setTodos(data);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
@@ -28,11 +44,11 @@ const Fetch = forwardRef((props, ref) => {
     fetchTodos();
   }, []);
 
-  const toggleTodo = (id) => {
+  const toggleTodo = (id: string) => {
     setExpandedTodo(expandedTodo === id ? null : id);
   };
 
-  const startEditing = (todo) => {
+  const startEditing = (todo: Todo) => {
     setEditingId(todo.id);
     setEditForm({ title: todo.title, description: todo.description || '' });
   };
@@ -42,11 +58,11 @@ const Fetch = forwardRef((props, ref) => {
     setEditForm({ title: '', description: '' });
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  const saveEdit = async (id) => {
+  const saveEdit = async (id: string) => {
     try {
       const response = await fetch(`http://localhost:5000/edit-todo/${id}`, {
         method: 'PUT',
@@ -62,11 +78,15 @@ const Fetch = forwardRef((props, ref) => {
       await fetchTodos();
       setEditingId(null);
     } catch (error) {
-      setError(error.message);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
-  const deleteTodo = async (id) => {
+  const deleteTodo = async (id: string) => {
     try {
       const response = await fetch(`http://localhost:5000/delete-todo/${id}`, {
         method: 'DELETE',
@@ -79,11 +99,15 @@ const Fetch = forwardRef((props, ref) => {
 
       await fetchTodos();
     } catch (error) {
-      setError(error.message);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
-  const toggleCompletion = async (id, currentStatus) => {
+  const toggleCompletion = async (id: string, currentStatus: boolean) => {
     try {
       const response = await fetch(`http://localhost:5000/toggle-todo/${id}`, {
         method: 'PATCH',
@@ -98,7 +122,11 @@ const Fetch = forwardRef((props, ref) => {
 
       await fetchTodos();
     } catch (error) {
-      setError(error.message);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
