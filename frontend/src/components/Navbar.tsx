@@ -40,23 +40,23 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 fixed w-full z-10 shadow-sm">
+    <nav className="bg-teal-800 border-b border-teal-900 fixed w-full z-10 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <Link href="/" className="flex-shrink-0 flex items-center text-xl font-bold text-blue-600">
+            <Link href="/" className="flex-shrink-0 flex items-center text-xl font-bold text-coral-300 hover:text-coral-200 transition-colors">
               TaskMaster
             </Link>
           </div>
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-teal-100">
                   {user.name}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1 rounded-md text-sm font-medium text-teal-900 bg-coral-400 hover:bg-coral-300 transition-colors"
                 >
                   Sign out
                 </button>
@@ -64,7 +64,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-3 py-1 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                className="px-3 py-1 rounded-md text-sm font-medium text-teal-100 hover:bg-teal-700 transition-colors"
               >
                 Sign in
               </Link>
