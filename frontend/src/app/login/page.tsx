@@ -19,7 +19,7 @@ export default function LoginForm() {
     setMessage('');
 
     try {
-      const res = await fetch('https://todo-backend-jade-delta.vercel.app/login', {
+      const res = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

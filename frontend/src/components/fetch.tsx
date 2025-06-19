@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import { Loader2, Check, ChevronDown, Edit, Trash2 } from 'lucide-react';
 
 interface Todo {
   id: string;
@@ -19,25 +20,52 @@ const Fetch = forwardRef((props, ref) => {
   const [expandedTodo, setExpandedTodo] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>({ title: '', description: '' });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
 
-  const BASE_URL = 'https://todo-backend-jade-delta.vercel.app';
+  const BASE_URL = 'http://localhost:5000';
 
-  const fetchTodos = async () => {
+  const safeFetch = async (url: string, options?: RequestInit) => {
     try {
-      const userId = localStorage.getItem('userId');
-      const response = await fetch(`${BASE_URL}/all/todos?userId=${userId || ''}`);
+      const response = await fetch(url, options);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch todos');
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: await response.text() || `HTTP error! status: ${response.status}` };
+        }
+        throw new Error(errorData.error || 'Request failed');
       }
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        throw new Error('Invalid response format: Expected JSON');
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error(`API Error (${url}):`, err);
+      throw err instanceof Error ? err : new Error('Unknown error occurred');
+    }
+  };
+
+  const fetchTodos = async () => {
+    setIsLoading(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      const data = await safeFetch(`${BASE_URL}/all/todos?userId=${userId || ''}`);
       setTodos(data);
       setError('');
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch todos');
+      setError(err instanceof Error ? err.message : 'Failed to load tasks');
+      if (err instanceof Error && err.message.includes('Unauthorized')) {
+        localStorage.removeItem('userId');
+        window.location.href = '/login';
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,61 +105,49 @@ const Fetch = forwardRef((props, ref) => {
       return;
     }
 
+    setIsMutating(true);
     try {
-      const response = await fetch(`${BASE_URL}/edit-todo/${id}`, {
+      await safeFetch(`${BASE_URL}/edit-todo/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update todo');
-      }
-
       await fetchTodos();
       setEditingId(null);
     } catch (error) {
-      console.error('Update error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to update todo');
+      setError(error instanceof Error ? error.message : 'Failed to update task');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const deleteTodo = async (id: string) => {
+    setIsMutating(true);
     try {
-      const response = await fetch(`${BASE_URL}/delete-todo/${id}`, {
+      await safeFetch(`${BASE_URL}/delete-todo/${id}`, {
         method: 'DELETE',
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete todo');
-      }
-
       await fetchTodos();
     } catch (error) {
-      console.error('Delete error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete todo');
+      setError(error instanceof Error ? error.message : 'Failed to delete task');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const toggleCompletion = async (id: string, currentStatus: boolean) => {
+    setIsMutating(true);
     try {
-      const response = await fetch(`${BASE_URL}/toggle-todo/${id}`, {
+      await safeFetch(`${BASE_URL}/toggle-todo/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isCompleted: !currentStatus }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update task status');
-      }
-
       await fetchTodos();
     } catch (error) {
-      console.error('Toggle error:', error);
       setError(error instanceof Error ? error.message : 'Failed to update status');
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -145,8 +161,8 @@ const Fetch = forwardRef((props, ref) => {
         </h2>
         
         {error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-center border border-red-100">
-            {error}
+          <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-center border border-red-100 flex justify-between items-center">
+            <span>{error}</span>
             <button 
               onClick={() => setError('')} 
               className="ml-2 text-red-800 hover:text-red-900"
@@ -156,153 +172,157 @@ const Fetch = forwardRef((props, ref) => {
             </button>
           </div>
         )}
-        
-        <div className="space-y-4">
-          {todos.map((todo) => (
-            <div 
-              key={todo.id} 
-              className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-200 border ${
-                todo.is_completed 
-                  ? 'bg-blue-50 border-blue-200' 
-                  : 'border-gray-200 hover:border-indigo-300'
-              } ${todo.description ? 'cursor-pointer hover:shadow-md' : ''}`}
-            >
-              <div className="flex items-center p-5">
-                <button
-                  onClick={() => toggleCompletion(todo.id, todo.is_completed)}
-                  className="mr-3 flex-shrink-0"
-                  aria-label={todo.is_completed ? 'Mark as incomplete' : 'Mark as complete'}
-                >
-                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
-                    todo.is_completed 
-                      ? 'bg-blue-500 border-blue-500 text-white' 
-                      : 'border-gray-300 hover:border-blue-500'
-                  }`}>
-                    {todo.is_completed && (
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </button>
 
-                <div className="flex-1">
-                  {editingId === todo.id ? (
-                    <input
-                      name="title"
-                      value={editForm.title}
-                      onChange={handleEditChange}
-                      className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500"
-                      autoFocus
-                    />
-                  ) : (
-                    <span 
-                      className={`font-medium text-lg ${
-                        todo.is_completed ? 'text-gray-500 line-through' : 'text-gray-800'
-                      }`}
-                      onClick={() => todo.description && toggleTodo(todo.id)}
-                    >
-                      {todo.title}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex space-x-2 ml-3">
-                  {editingId === todo.id ? (
-                    <>
-                      <button
-                        onClick={() => saveEdit(todo.id)}
-                        className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg transition-colors"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => startEditing(todo)}
-                        className="text-gray-500 hover:text-indigo-600 transition-colors"
-                        title="Edit task"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => deleteTodo(todo.id)}
-                        className="text-gray-500 hover:text-red-600 transition-colors"
-                        title="Delete task"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                  
-                  {todo.description && editingId !== todo.id && (
-                    <button
-                      onClick={() => toggleTodo(todo.id)}
-                      className="text-gray-500 hover:text-indigo-600 transition-colors"
-                      title={expandedTodo === todo.id ? 'Collapse' : 'Expand'}
-                    >
-                      <svg
-                        className={`w-5 h-5 transform transition-transform ${
-                          expandedTodo === todo.id ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              {editingId === todo.id ? (
-                <div className="px-5 pb-5">
-                  <textarea
-                    name="description"
-                    value={editForm.description}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    rows={3}
-                    placeholder="Add description..."
-                  />
-                </div>
-              ) : (
-                todo.description && expandedTodo === todo.id && (
-                  <div className={`px-5 pb-5 pt-3 text-gray-600 text-base border-t ${
-                    todo.is_completed ? 'bg-blue-50 border-blue-200' : 'bg-indigo-50 border-indigo-100'
-                  }`}>
-                    {todo.description}
-                  </div>
-                )
-              )}
-            </div>
-          ))}
-        </div>
-
-        {todos.length === 0 && (
-          <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-medium text-gray-600 mb-2">No tasks yet</h3>
-            <p className="text-gray-500 max-w-md mx-auto">
-              Get started by adding your first task using the form above
-            </p>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="animate-spin h-12 w-12 text-indigo-600" />
           </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {todos.map((todo) => (
+                <div 
+                  key={todo.id} 
+                  className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-200 border ${
+                    todo.is_completed 
+                      ? 'bg-blue-50 border-blue-200' 
+                      : 'border-gray-200 hover:border-indigo-300'
+                  } ${todo.description ? 'cursor-pointer hover:shadow-md' : ''}`}
+                >
+                  <div className="flex items-center p-5">
+                    <button
+                      onClick={() => toggleCompletion(todo.id, todo.is_completed)}
+                      className="mr-3 flex-shrink-0"
+                      disabled={isMutating}
+                      aria-label={todo.is_completed ? 'Mark as incomplete' : 'Mark as complete'}
+                    >
+                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                        todo.is_completed 
+                          ? 'bg-blue-500 border-blue-500 text-white' 
+                          : 'border-gray-300 hover:border-blue-500'
+                      }`}>
+                        {todo.is_completed && (
+                          <Check className="w-3 h-3" strokeWidth={3} />
+                        )}
+                      </div>
+                    </button>
+
+                    <div className="flex-1">
+                      {editingId === todo.id ? (
+                        <input
+                          name="title"
+                          value={editForm.title}
+                          onChange={handleEditChange}
+                          className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500"
+                          autoFocus
+                          disabled={isMutating}
+                        />
+                      ) : (
+                        <span 
+                          className={`font-medium text-lg ${
+                            todo.is_completed ? 'text-gray-500 line-through' : 'text-gray-800'
+                          }`}
+                          onClick={() => todo.description && toggleTodo(todo.id)}
+                        >
+                          {todo.title}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex space-x-2 ml-3">
+                      {editingId === todo.id ? (
+                        <>
+                          <button
+                            onClick={() => saveEdit(todo.id)}
+                            disabled={isMutating}
+                            className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg transition-colors flex items-center"
+                          >
+                            {isMutating ? <Loader2 className="animate-spin mr-1 h-4 w-4" /> : null}
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            disabled={isMutating}
+                            className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => startEditing(todo)}
+                            disabled={isMutating}
+                            className="text-gray-500 hover:text-indigo-600 transition-colors"
+                            title="Edit task"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => deleteTodo(todo.id)}
+                            disabled={isMutating}
+                            className="text-gray-500 hover:text-red-600 transition-colors"
+                            title="Delete task"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+                      
+                      {todo.description && editingId !== todo.id && (
+                        <button
+                          onClick={() => toggleTodo(todo.id)}
+                          disabled={isMutating}
+                          className="text-gray-500 hover:text-indigo-600 transition-colors"
+                          title={expandedTodo === todo.id ? 'Collapse' : 'Expand'}
+                        >
+                          <ChevronDown className={`w-5 h-5 transform transition-transform ${
+                            expandedTodo === todo.id ? 'rotate-180' : ''
+                          }`} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {editingId === todo.id ? (
+                    <div className="px-5 pb-5">
+                      <textarea
+                        name="description"
+                        value={editForm.description}
+                        onChange={handleEditChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        rows={3}
+                        placeholder="Add description..."
+                        disabled={isMutating}
+                      />
+                    </div>
+                  ) : (
+                    todo.description && expandedTodo === todo.id && (
+                      <div className={`px-5 pb-5 pt-3 text-gray-600 text-base border-t ${
+                        todo.is_completed ? 'bg-blue-50 border-blue-200' : 'bg-indigo-50 border-indigo-100'
+                      }`}>
+                        {todo.description}
+                      </div>
+                    )
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {todos.length === 0 && !isLoading && (
+              <div className="text-center py-12">
+                <div className="mx-auto w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium text-gray-600 mb-2">No tasks yet</h3>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Get started by adding your first task using the form above
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
