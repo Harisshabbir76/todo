@@ -23,7 +23,7 @@ const Fetch = forwardRef((props, ref) => {
   const fetchTodos = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const response = await fetch(`http://localhost:5000/all/todos?userId=${userId || ''}`);
+      const response = await fetch(`https://todo-backend-yktq.onrender.com/all/todos?userId=${userId || ''}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to fetch todos');
       setTodos(data);
@@ -64,7 +64,7 @@ const Fetch = forwardRef((props, ref) => {
 
   const saveEdit = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/edit-todo/${id}`, {
+      const response = await fetch(`https://todo-backend-yktq.onrender.com/edit-todo/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
@@ -88,7 +88,7 @@ const Fetch = forwardRef((props, ref) => {
 
   const deleteTodo = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/delete-todo/${id}`, {
+      const response = await fetch(`https://todo-backend-yktq.onrender.com/delete-todo/${id}`, {
         method: 'DELETE',
       });
 
@@ -109,7 +109,7 @@ const Fetch = forwardRef((props, ref) => {
 
   const toggleCompletion = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`http://localhost:5000/toggle-todo/${id}`, {
+      const response = await fetch(`https://todo-backend-yktq.onrender.com/toggle-todo/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isCompleted: !currentStatus }),
