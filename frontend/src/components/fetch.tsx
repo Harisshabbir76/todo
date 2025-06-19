@@ -131,16 +131,16 @@ const Fetch = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="min-h-[60vh] bg-slate-50 py-6 px-4">
+    <div className="min-h-[60vh] bg-white py-6 px-4">
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">
-          <span className="bg-gradient-to-r from-teal-500 to-emerald-600 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             My Tasks
           </span>
         </h2>
         
         {error && (
-          <div className="bg-rose-100 text-rose-800 p-4 rounded-xl mb-6 text-center border border-rose-200">
+          <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-center border border-red-100">
             {error}
           </div>
         )}
@@ -151,8 +151,8 @@ const Fetch = forwardRef((props, ref) => {
               key={todo.id} 
               className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-200 border ${
                 todo.is_completed 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'border-slate-200 hover:border-teal-300'
+                  ? 'bg-blue-50 border-blue-200' 
+                  : 'border-gray-200 hover:border-indigo-300'
               } ${todo.description ? 'cursor-pointer hover:shadow-md' : ''}`}
             >
               <div className="flex items-center p-5">
@@ -163,8 +163,8 @@ const Fetch = forwardRef((props, ref) => {
                 >
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
                     todo.is_completed 
-                      ? 'bg-green-500 border-green-500 text-white' 
-                      : 'border-slate-300 hover:border-green-500'
+                      ? 'bg-blue-500 border-blue-500 text-white' 
+                      : 'border-gray-300 hover:border-blue-500'
                   }`}>
                     {todo.is_completed && (
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,12 +180,12 @@ const Fetch = forwardRef((props, ref) => {
                       name="title"
                       value={editForm.title}
                       onChange={handleEditChange}
-                      className="w-full px-3 py-2 border-b border-slate-300 focus:outline-none focus:border-teal-500"
+                      className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500"
                     />
                   ) : (
                     <span 
                       className={`font-medium text-lg ${
-                        todo.is_completed ? 'text-slate-500 line-through' : 'text-slate-800'
+                        todo.is_completed ? 'text-gray-500 line-through' : 'text-gray-800'
                       }`}
                       onClick={() => todo.description && toggleTodo(todo.id)}
                     >
@@ -199,13 +199,13 @@ const Fetch = forwardRef((props, ref) => {
                     <>
                       <button
                         onClick={() => saveEdit(todo.id)}
-                        className="text-sm text-white bg-teal-500 hover:bg-teal-600 px-3 py-1 rounded-lg"
+                        className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg"
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEditing}
-                        className="text-sm text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg"
+                        className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg"
                       >
                         Cancel
                       </button>
@@ -214,7 +214,7 @@ const Fetch = forwardRef((props, ref) => {
                     <>
                       <button
                         onClick={() => startEditing(todo)}
-                        className="text-slate-500 hover:text-teal-600 transition-colors"
+                        className="text-gray-500 hover:text-indigo-600 transition-colors"
                         title="Edit task"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@ const Fetch = forwardRef((props, ref) => {
                       </button>
                       <button
                         onClick={() => deleteTodo(todo.id)}
-                        className="text-slate-500 hover:text-rose-600 transition-colors"
+                        className="text-gray-500 hover:text-red-600 transition-colors"
                         title="Delete task"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +236,7 @@ const Fetch = forwardRef((props, ref) => {
                   {todo.description && editingId !== todo.id && (
                     <button
                       onClick={() => toggleTodo(todo.id)}
-                      className="text-slate-500 hover:text-teal-600 transition-colors"
+                      className="text-gray-500 hover:text-indigo-600 transition-colors"
                       title={expandedTodo === todo.id ? 'Collapse' : 'Expand'}
                     >
                       <svg
@@ -260,15 +260,15 @@ const Fetch = forwardRef((props, ref) => {
                     name="description"
                     value={editForm.description}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     rows={3}
                     placeholder="Add description..."
                   />
                 </div>
               ) : (
                 todo.description && expandedTodo === todo.id && (
-                  <div className={`px-5 pb-5 pt-3 text-slate-600 text-base border-t ${
-                    todo.is_completed ? 'bg-green-50/50 border-green-200' : 'bg-teal-50/50 border-teal-100/50'
+                  <div className={`px-5 pb-5 pt-3 text-gray-600 text-base border-t ${
+                    todo.is_completed ? 'bg-blue-50 border-blue-200' : 'bg-indigo-50 border-indigo-100'
                   }`}>
                     {todo.description}
                   </div>
@@ -280,13 +280,13 @@ const Fetch = forwardRef((props, ref) => {
 
         {todos.length === 0 && (
           <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-12 h-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h3 className="text-xl font-medium text-slate-600 mb-2">No tasks yet</h3>
-            <p className="text-slate-500 max-w-md mx-auto">
+            <h3 className="text-xl font-medium text-gray-600 mb-2">No tasks yet</h3>
+            <p className="text-gray-500 max-w-md mx-auto">
               Get started by adding your first task using the form above
             </p>
           </div>
