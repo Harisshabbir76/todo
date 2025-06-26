@@ -7,10 +7,17 @@ const db = require('./db');
 dotenv.config();
 
 const app = express();
+
+const allowedOrigins = [
+  'http://localhost:3000', // local dev
+  'https://todo-eta-swart-73.vercel.app' // vercel production site
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000', // Your frontend origin
-  credentials: true // Allow credentials
+  origin: allowedOrigins,
+  credentials: true
 }));
+
 
 app.use(express.json());
 
