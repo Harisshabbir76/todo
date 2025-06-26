@@ -7,9 +7,18 @@ export default function Home() {
   const fetchRef = useRef<{ fetchTodos: () => void }>(null);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-6">
-      <AddForm onTaskAdded={() => fetchRef.current?.fetchTodos()} />
-      <Fetch ref={fetchRef} />
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row gap-8">
+         
+        <div className="md:w-1/3">
+          <AddForm onTaskAdded={() => fetchRef.current?.fetchTodos()} />
+        </div>
+        
+        
+        <div className="md:w-2/3">
+          <Fetch ref={fetchRef} />
+        </div>
+      </div>
     </div>
   );
 }

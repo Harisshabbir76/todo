@@ -84,18 +84,23 @@ app.get('/all/todos', async (req, res) => {
     let rows;
     if (userId) {
       [rows] = await db.connection.promise().query(
-        'SELECT * FROM todos WHERE user_id = ? ORDER BY created_at DESC',
+        'SELECT id, title, description, is_completed AS isCompleted FROM todos WHERE user_id = ? ORDER BY created_at DESC',
         [userId]
       );
     } else {
       [rows] = await db.connection.promise().query(
-        `SELECT * FROM todos 
+        `SELECT id, title, description, is_completed AS isCompleted FROM todos 
          WHERE user_id IS NULL 
          AND created_at > NOW() - INTERVAL 10 HOUR 
          ORDER BY created_at DESC`
       );
     }
-    res.status(200).json(rows);
+    // Convert numeric is_completed to boolean
+    const processedRows = rows.map(row => ({
+      ...row,
+      is_completed: Boolean(row.isCompleted)
+    }));
+    res.status(200).json(processedRows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch todos' });
