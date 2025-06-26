@@ -2,14 +2,13 @@
 import AddForm from '../components/add-form';
 import Fetch from '../components/fetch';
 import { useRef } from 'react';
-import Navbar from '../components/Navbar';
 
 export default function Home() {
   const fetchRef = useRef<{ fetchTodos: () => void }>(null);
 
   return (
     <>
-      <Navbar />
+      
       <div className="container mx-auto px-4 pt-20 pb-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column - Add Form */}
