@@ -23,7 +23,7 @@ const Fetch = forwardRef((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
 
-  const BASE_URL = 'http://localhost:5000';
+  const BASE_URL = 'https://todo-production-c2c6.up.railway.app';
 
   const safeFetch = async (url: string, options?: RequestInit) => {
     try {
