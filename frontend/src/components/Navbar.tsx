@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, { 
+      const response = await fetch(`https://todo-production-c2c6.up.railway.app/logout`, { 
         method: 'POST',
         credentials: 'include', // Important for cookies
         headers: {
