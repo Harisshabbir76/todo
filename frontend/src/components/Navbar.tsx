@@ -29,13 +29,32 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3000/logout', { method: 'POST' });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, { 
+        method: 'POST',
+        credentials: 'include', // Important for cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
+      // Clear local storage
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
-      setUser(null);
+      
+      // Force state update by triggering storage event
+      window.dispatchEvent(new Event('storage'));
+      
+      // Redirect to home
       router.push('/');
+      router.refresh(); // Ensure page updates
+      
     } catch (error) {
       console.error('Logout failed:', error);
+      alert('Logout failed. Please try again.');
     }
   };
 
@@ -53,14 +72,19 @@ export default function Navbar() {
               </span>
             </Link>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg"
-              >
-                Sign Out
-              </button>
+              <>
+                <span className="text-white text-sm hidden sm:block">
+                  Welcome, {user.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg"
+                >
+                  Sign Out
+                </button>
+              </>
             ) : (
               <Link
                 href="/login"

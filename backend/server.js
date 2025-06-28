@@ -63,6 +63,27 @@ app.get('/health', async (req, res) => {
   }
 });
 
+
+// Updated logout endpoint in server.js
+app.post('/logout', (req, res) => {
+  try {
+    // Clear any authentication tokens or cookies
+    res.clearCookie('auth_token');
+    
+    // Send proper response
+    res.status(200).json({ 
+      success: true,
+      message: 'Logged out successfully' 
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Logout failed' 
+    });
+  }
+});
+
 // User Registration
 app.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
