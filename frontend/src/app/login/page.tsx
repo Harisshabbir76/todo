@@ -19,7 +19,7 @@ export default function LoginForm() {
     setMessage('');
 
     try {
-      const res = await fetch('https://todo-production-c2c6.up.railway.app/login', {
+      const res = await fetch('http://51.20.108.227:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

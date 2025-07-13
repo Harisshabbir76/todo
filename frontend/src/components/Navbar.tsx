@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`https://todo-production-c2c6.up.railway.app/logout`, { 
+      const response = await fetch(`http://51.20.108.227:5000/logout`, { 
         method: 'POST',
         credentials: 'include', // Important for cookies
         headers: {

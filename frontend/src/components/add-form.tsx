@@ -25,7 +25,7 @@ export default function AddForm({ onTaskAdded = () => {} }: AddFormProps) {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('https://todo-production-c2c6.up.railway.app/add-todo', {
+      const response = await fetch('http://51.20.108.227:5000/add-todo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, userId }),

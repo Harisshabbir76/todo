@@ -11,7 +11,8 @@ const app = express();
 // Enhanced CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://todo-eta-swart-73.vercel.app'
+  'https://todo-eta-swart-73.vercel.app',
+  'http://51.20.108.227:3001'
 ];
 
 app.use(cors({
