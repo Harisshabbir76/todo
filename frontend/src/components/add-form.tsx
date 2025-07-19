@@ -2,6 +2,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 interface AddFormProps {
   onTaskAdded?: () => void;
@@ -12,6 +13,7 @@ export default function AddForm({ onTaskAdded = () => {} }: AddFormProps) {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function AddForm({ onTaskAdded = () => {} }: AddFormProps) {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://16.171.197.202:5000/add-todo', {
+      const response = await fetch(`${BASE_URL}/add-todo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, userId }),

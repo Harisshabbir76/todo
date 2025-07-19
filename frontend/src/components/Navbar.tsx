@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 interface User {
   id: string;
@@ -11,6 +12,7 @@ interface User {
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  
 
   useEffect(() => {
     const checkAuth = () => {
@@ -29,7 +31,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`http://16.171.197.202:5000/logout`, { 
+      const response = await fetch(`${BASE_URL}/logout`, { 
         method: 'POST',
         credentials: 'include', // Important for cookies
         headers: {

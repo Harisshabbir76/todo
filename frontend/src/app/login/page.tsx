@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export default function LoginForm() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -19,7 +20,7 @@ export default function LoginForm() {
     setMessage('');
 
     try {
-      const res = await fetch('http://16.171.197.202:5000/login', {
+      const res = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { Loader2, Check, ChevronDown, Edit, Trash2 } from 'lucide-react';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 interface Todo {
   id: string;
@@ -23,7 +24,7 @@ const Fetch = forwardRef((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
 
-  const BASE_URL = 'http://16.171.197.202:5000';
+  
 
   const safeFetch = async (url: string, options?: RequestInit) => {
     try {
