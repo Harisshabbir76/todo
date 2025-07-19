@@ -19,7 +19,7 @@ export default function SignupForm() {
     setMessage('');
 
     try {
-      const res = await fetch('http://51.20.108.227:5000/signup', {
+      const res = await fetch('http://16.171.197.202:5000/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

@@ -11,22 +11,38 @@ const app = express();
 // Enhanced CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://51.20.108.227:3000',
   'https://todo-eta-swart-73.vercel.app',
-  'http://51.20.108.227:3001'
+  'http://16.171.197.202:5000/' // Add this line
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in the allowed list or contains the EC2 IP
+    if (
+      allowedOrigins.includes(origin) || 
+      origin.includes('51.20.108.227') // Allow any port from this IP
+    ) {
+      console.log(`✅ CORS allowed: ${origin}`);
+      return callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log(`❌ CORS blocked: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+};
+
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -364,7 +380,7 @@ process.on('SIGINT', gracefulShutdown);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 

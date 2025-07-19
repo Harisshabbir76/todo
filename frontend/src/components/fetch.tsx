@@ -23,7 +23,7 @@ const Fetch = forwardRef((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
 
-  const BASE_URL = 'http://51.20.108.227:5000';
+  const BASE_URL = 'http://16.171.197.202:5000';
 
   const safeFetch = async (url: string, options?: RequestInit) => {
     try {
